@@ -1,0 +1,20 @@
+
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>foo</title>
+    <itunes:owner>
+      <itunes:email>me@todgru.com</itunes:email>
+    </itunes:owner>
+    <itunes:author>me</itunes:author>
+    <description>test</description>
+    <itunes:image>https://www.example.com/podcasts/dafnas-zebras/img/dafna-zebra-pod-logo.jpg</itunes:image>
+    <language>en-us</language>
+    <link>https://www.example.com/podcasts/dafnas-zebras/</link>
+    <item>
+      <title>Top 10 myths about caring for a zebra</title>
+      <description>Here are the top 10 misunderstandings about the care, feeding, and breeding of these lovable striped animals.</description>
+      <pubDate>Tue, 14 Mar 2017 12:00:00 GMT</pubDate>
+      <enclosure url="https://www.example.com/podcasts/dafnas-zebras/audio/toptenmyths.mp3" type="audio/mpeg" length="34216300"/>
+    </item>
+  </channel>
+</rss>

@@ -1,6 +1,7 @@
 "use strict";
 
 const { toXML } = require("jstoxml");
+const fs = require("fs");
 
 /*
 <?xml version="1.0" encoding="UTF-8"?>
@@ -93,3 +94,4 @@ const rss = {
 
 const result = toXML(rss, xmlOptions);
 console.log(result);
+fs.writeFileSync("rss.xml", result);
