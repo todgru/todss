@@ -1,0 +1,20 @@
+{
+  "name": "todss",
+  "version": "0.0.1",
+  "description": "todss",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "jstoxml": "^2.2.8"
+  },
+  "devDependencies": {
+    "eslint-config-tg": "git+ssh://git@github.com/todgru/eslint-config-tg.git"
+  },
+  "eslintConfig": {
+    "extends": "eslint-config-tg"
+  }
+}
