@@ -58,6 +58,8 @@ mp3Directories.forEach(artist => {
   const PATH = RSS_PATH + artist;
   if (!fs.existsSync(PATH)) fs.mkdirSync(PATH);
 
+  // @todo read subdirctories in the "mp3" path should be smarter; dir vs file
+  if (artist === ".gitkeep") return;
   const files = fs.readdirSync(MP3_PATH + artist);
   const mp3s = files.filter(file => path.extname(MP3_PATH + file).toLowerCase() === ".mp3");
 
