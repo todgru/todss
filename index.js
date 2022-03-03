@@ -1,97 +1,98 @@
 "use strict";
 
 const { toXML } = require("jstoxml");
+const NodeID3 = require("node-id3");
 const fs = require("fs");
-
-/*
-<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0"
-    xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
-  <channel>
-    <title>Dafna's Zebra Podcast</title>
-    <itunes:owner>
-        <itunes:email>dafna@example.com</itunes:email>
-    </itunes:owner>
-    <itunes:author>Dafna</itunes:author>
-    <description>A pet-owner's guide to the popular striped equine.</description>
-    <itunes:image href="https://www.example.com/podcasts/dafnas-zebras/img/dafna-zebra-pod-logo.jpg"/>
-    <language>en-us</language>
-    <link>https://www.example.com/podcasts/dafnas-zebras/</link>
-    <item>
-      <title>Top 10 myths about caring for a zebra</title>
-      <description>Here are the top 10 misunderstandings about the care, feeding, and breeding of these lovable striped animals.</description>
-      <pubDate>Tue, 14 Mar 2017 12:00:00 GMT</pubDate>
-      <enclosure url="https://www.example.com/podcasts/dafnas-zebras/audio/toptenmyths.mp3"
-                 type="audio/mpeg" length="34216300"/>
-      <itunes:duration>30:00</itunes:duration>
-      <guid isPermaLink="false">dzpodtop10</guid>
-    </item>
-    <item>
-      <title>Keeping those stripes neat and clean</title>
-      <description>Keeping your zebra clean is time consuming, but worth the effort.</description>
-      <pubDate>Fri, 24 Feb 2017 12:00:00 GMT</pubDate>
-      <enclosure url="https://www.example.com/podcasts/dafnas-zebras/audio/cleanstripes.mp3"
-                 type="audio/mpeg" length="26004388"/>
-      <itunes:duration>22:48</itunes:duration>
-      <guid>dzpodclean</guid>
-    </item>
-  </channel>
-</rss>
-*/
-
-const xmlOptions = {
-  header: false,
-  indent: "  ",
+const path = require("path");
+const XML_OPTIONS = {
+  header: true,
+  indent: "	",
 };
 
-const rss = {
-  _name: "rss",
-  _content: {
-    channel: {
-      title: "foo",
-      "itunes:owner": {
-        "itunes:email": "me@todgru.com",
-      },
-      "itunes:author": "me",
-      description: "test",
-      "itunes:image": "https://www.example.com/podcasts/dafnas-zebras/img/dafna-zebra-pod-logo.jpg",
-      language: "en-us",
-      link: "https://www.example.com/podcasts/dafnas-zebras/",
-      item: [
-        {
-          title: "Top 10 myths about caring for a zebra",
-          description:
-            "Here are the top 10 misunderstandings about the care, feeding, and breeding of these lovable striped animals.",
-          pubDate: "Tue, 14 Mar 2017 12:00:00 GMT",
-          enclosure: {
-            _attrs: {
-              url: "https://www.example.com/podcasts/dafnas-zebras/audio/toptenmyths.mp3",
-              type: "audio/mpeg",
-              length: "34216300",
-            },
-          },
-          // <itunes:duration>30:00</itunes:duration>
-          // <guid isPermaLink="false">dzpodtop10</guid>
-        },
-      ],
-      // </item>
-      // <item>
-      //   <title>Keeping those stripes neat and clean</title>
-      //   <description>Keeping your zebra clean is time consuming, but worth the effort.</description>
-      //   <pubDate>Fri, 24 Feb 2017 12:00:00 GMT</pubDate>
-      //   <enclosure url="https://www.example.com/podcasts/dafnas-zebras/audio/cleanstripes.mp3"
-      //              type="audio/mpeg" length="26004388"/>
-      //   <itunes:duration>22:48</itunes:duration>
-      //   <guid>dzpodclean</guid>
-      // </item>
+// user editable constants
+const PODCAST_FEED_EMAIL = "me@example.com";
+const PODCAST_FEED_AUTHOR = "Example Author";
+const PODCAST_FEED_DESCRIPTION = "Example description";
+const PODCAST_FEED_LANGUAGE = "en-US";
+const PODCAST_FEED_URL = "https://example.com";
+const MP3_URL = "https://example.com/path/to/mp3s/";
+const MP3_PATH = "mp3/";
+const RSS_PATH = "rss/";
+
+//
+// Create podcast xml files based on mp3 directory and files
+//
+const normalizedPath = path.join(__dirname, MP3_PATH);
+const mp3Directories = fs.readdirSync(normalizedPath);
+
+const formatItem = (file, i) => {
+  const mp3Url = `${MP3_URL}${file}`;
+  const tags = NodeID3.read(`${normalizedPath}/${file}`);
+
+  const item = {
+    "itunes:episodeType": "full",
+    "itunes:explicit": "no",
+    "itunes:subtitle": "",
+    "itunes:title": tags.title,
+    description: tags.album,
+    link: "", // @todo what is "link"?
+    // @todo make pubDate an appropriate date
+    pubDate: `Tue, ${i + 1} Jan ${tags.raw.TYER || "2022"} 12:00:00 GMT`,
+    title: file,
+    guid: {
+      _attrs: { isPermaLink: "true" },
+      _content: mp3Url,
     },
-  },
-  _attrs: {
-    version: "2.0",
-    "xmlns:itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd",
-  },
+    enclosure: {
+      _attrs: {
+        url: mp3Url,
+        type: "audio/mpeg", // @todo verify
+        length: "1234", // @todo determine
+      },
+    },
+  };
+  return { item };
 };
 
-const result = toXML(rss, xmlOptions);
-console.log(result);
-fs.writeFileSync("rss.xml", result);
+mp3Directories.forEach(artist => {
+  const PATH = RSS_PATH + artist;
+  if (!fs.existsSync(PATH)) fs.mkdirSync(PATH);
+
+  const files = fs.readdirSync(MP3_PATH + artist);
+  const mp3s = files.filter(file => path.extname(MP3_PATH + file).toLowerCase() === ".mp3");
+
+  const items = mp3s.map((file, i) => formatItem(`${artist}/${file}`, i));
+  const rss = [
+    {
+      _name: "rss",
+      _attrs: {
+        version: "2.0",
+        "xmlns:itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        "xmlns:content": "http://purl.org/rss/1.0/modules/content/",
+      },
+      _content: {
+        channel: [
+          {
+            title: artist,
+            "itunes:owner": { "itunes:email": PODCAST_FEED_EMAIL },
+            "itunes:author": PODCAST_FEED_AUTHOR,
+            description: PODCAST_FEED_DESCRIPTION,
+            language: PODCAST_FEED_LANGUAGE,
+            link: PODCAST_FEED_URL,
+          },
+          items,
+        ],
+      },
+    },
+  ];
+
+  const result = toXML(rss, XML_OPTIONS);
+  fs.writeFileSync(`${PATH}/index.xml`, result);
+});
+
+// @todo write podcast list to "/index.html" or some simliar path
+// mp3Directories.forEach(artist => {
+//   const indexFile = // collection of artist podcasts available for subscription.
+//   const rssPath = RSS_PATH + artist;
+//   fs.writeFileSync(`${rssPath}/index.html`, indexFile);
+// });

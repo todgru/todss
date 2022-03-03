@@ -3,13 +3,19 @@
   "version": "0.0.1",
   "description": "todss",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:todgru/todss.git"
   },
-  "author": "",
-  "license": "UNLICENSED",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create": "node index.js"
+  },
+  "author": "todgru",
+  "license": "GPL",
   "dependencies": {
-    "jstoxml": "^2.2.8"
+    "jstoxml": "2.2.8",
+    "node-id3": "0.2.3"
   },
   "devDependencies": {
     "eslint-config-tg": "git+ssh://git@github.com/todgru/eslint-config-tg.git"
